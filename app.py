@@ -31,18 +31,21 @@ def index():
         <title>Gmail Viewer デモ</title>
         <style>
             body { font-family:"Roboto","Arial",sans-serif; background:#f1f3f4; display:flex; justify-content:center; align-items:center; height:100vh; margin:0; }
-            .login-box { background:#fff; padding:40px; border-radius:8px; box-shadow:0 4px 12px rgba(0,0,0,0.1); text-align:center; width:320px; }
-            h1 { font-size:24px; color:#202124; margin-bottom:24px; }
-            a.login-btn { display:inline-block; background:#1a73e8; color:#fff; padding:12px 24px; border-radius:4px; text-decoration:none; font-weight:500; margin-bottom:16px; }
+            .login-box { background:#fff; padding:40px; border-radius:8px; box-shadow:0 4px 12px rgba(0,0,0,0.1); text-align:center; width:360px; }
+            h1 { font-size:28px; color:#202124; margin-bottom:24px; font-weight:500; }
+            a.login-btn { display:inline-block; background:#1a73e8; color:#fff; padding:14px 28px; border-radius:4px; text-decoration:none; font-weight:500; font-size:16px; transition:background 0.2s; }
             a.login-btn:hover { background:#1558b0; }
-            .links a { color:#5f6368; font-size:14px; margin:0 6px; text-decoration:none; }
+            .links { margin-top:20px; font-size:12px; color:#5f6368; }
+            .links a { color:#5f6368; text-decoration:none; margin:0 6px; }
             .links a:hover { text-decoration:underline; }
         </style>
         </head>
         <body>
             <div class="login-box">
-                <h1>📧 Gmail Viewer デモ</h1>
-                <a class="login-btn" href="{{ url_for('login') }}">Googleでログイン</a>
+                <h1>📧 Gmail Viewer</h1>
+                <p>デモ用ログインです</p>
+                <!-- ここをクリックしたら /login に遷移 -->
+                <a class="login-btn" href="{{ url_for('login') }}">ログインしてメールを見る</a>
                 <div class="links">
                     <a href="{{ url_for('privacy_policy') }}">プライバシーポリシー</a> |
                     <a href="{{ url_for('terms') }}">利用規約</a>
@@ -51,16 +54,16 @@ def index():
         </body>
         </html>
         """)
-
+    # すでにログイン済みならメール画面へ
     return redirect("/emails")
 
 # ----------------------
-# デモログイン（クリックでログイン扱い）
+# デモログイン（クリックでメール画面へ遷移）
 # ----------------------
 @app.route("/login")
 def login():
     session["logged_in"] = True
-    return redirect("/emails")
+    return redirect("/emails")  # クリックで直接メール画面に遷移
 
 # ----------------------
 # メール一覧
@@ -79,28 +82,36 @@ def emails():
     <title>Gmail Viewer デモ</title>
     <style>
         body { font-family:"Roboto","Arial",sans-serif; margin:0; background:#f1f3f4; color:#202124;}
-        .header {display:flex; justify-content:space-between; align-items:center; background:#fff; border-bottom:1px solid #dadce0; height:56px; padding:0 16px;}
-        .logo {font-weight:500; color:#d93025; font-size:20px;}
-        .inbox {padding:16px;}
-        .mail-item {background:#fff; margin-bottom:12px; padding:12px 16px; border-radius:6px; box-shadow:0 1px 3px rgba(0,0,0,0.1);}
-        .mail-item .subject {font-weight:500;}
-        .mail-item .meta {font-size:13px; color:#5f6368;}
-        a.logout {color:#1a73e8; text-decoration:none; margin-left:12px;}
+        .header {display:flex; justify-content:space-between; align-items:center; background:#fff; border-bottom:1px solid #dadce0; height:64px; padding:0 24px; box-shadow:0 1px 3px rgba(0,0,0,0.08);}
+        .logo {font-weight:500; color:#d93025; font-size:22px;}
+        .header a.logout {color:#1a73e8; text-decoration:none; font-weight:500;}
+        .sidebar {width:240px; background:#f8f9fa; border-right:1px solid #dadce0; padding-top:12px; position:fixed; top:64px; bottom:0; overflow-y:auto;}
+        .sidebar .folder {padding:12px 24px; cursor:pointer; font-size:14px; color:#5f6368;}
+        .sidebar .folder.active {background:#e8f0fe; color:#1967d2; font-weight:500;}
+        .main {margin-left:240px; padding:16px; margin-top:64px;}
+        .mail-item {background:#fff; margin-bottom:12px; padding:14px 18px; border-radius:6px; box-shadow:0 1px 3px rgba(0,0,0,0.08);}
+        .mail-item .subject {font-weight:500; font-size:16px; margin-bottom:4px;}
+        .mail-item .meta {font-size:13px; color:#5f6368; margin-bottom:6px;}
     </style>
     </head>
     <body>
         <div class="header">
             <div class="logo">Gmail Viewer デモ</div>
-            <div><a class="logout" href="{{ url_for('logout') }}">ログアウト</a></div>
+            <a class="logout" href="{{ url_for('logout') }}">ログアウト</a>
         </div>
-        <div class="inbox">
-        {% for email in emails %}
-            <div class="mail-item">
-                <div class="meta">{{ email.from }} | {{ email.label }}</div>
-                <div class="subject">{{ email.subject }}</div>
-                <pre>{{ email.body }}</pre>
-            </div>
-        {% endfor %}
+        <div class="sidebar">
+            <div class="folder active">受信トレイ</div>
+            <div class="folder">送信済み</div>
+            <div class="folder">下書き</div>
+        </div>
+        <div class="main">
+            {% for email in emails %}
+                <div class="mail-item">
+                    <div class="meta">{{ email.from }} | {{ email.label }}</div>
+                    <div class="subject">{{ email.subject }}</div>
+                    <pre>{{ email.body }}</pre>
+                </div>
+            {% endfor %}
         </div>
     </body>
     </html>
